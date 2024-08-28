@@ -1,38 +1,28 @@
-import { Grid, Switch } from '@mui/material'
+import { FormControl, Grid, MenuItem, Select, Switch } from '@mui/material'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Button } from '../ui/button'
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Linkedin, Locate, Mail, User } from 'lucide-react';
-import StateList from '../../lib/state.json'
 import CityList from '../../lib/city.json'
-import { schema } from './schema';
+import { defaultValues, schema } from './schema';
 
 
 function AddCrud({ handleAddobj, toggle }) {
 
-    const defaultValues = {
-        name: "",
-        email: "",
-        linkedin: "",
-        gender: null,
-        address1: "",
-        address2: "",
-        state: "",
-        city: "",
-        pincode: "",
-        edit: true
-    }
-
-    const { handleSubmit, reset, control, formState: { errors, isValid, isDirty }, getValues, watch } = useForm({
-        mode: "onChange",
+    const { handleSubmit, reset, control, formState: { errors }, watch } = useForm({
+        mode: "onTouched",
         resolver: yupResolver(schema),
         defaultValues: defaultValues
     })
 
-    const watchFields=watch("state")
-
-    console.log(Object.keys(CityList))
+    const watchFields = watch("state")
+    const filterState = CityList.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+            t.state === value.state
+        ))
+    )
+    const filterCity = CityList.filter((item) => item.state === watchFields)
 
     const onSubmit = (data) => {
         data["id"] = parseInt(Math.random() * 1000);
@@ -113,13 +103,16 @@ function AddCrud({ handleAddobj, toggle }) {
                         control={control}
                         name='gender'
                         render={({ field }) => (
-                            <select {...field}
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option></option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Not to specify">Not to specify</option>
-                            </select>
+                            <FormControl size='small' fullWidth>
+                                <Select
+                                    {...field}
+                                    labelId="demo-simple-select-label"
+                                >
+                                    <MenuItem value="Male">Male</MenuItem>
+                                    <MenuItem value="Female">Female</MenuItem>
+                                    <MenuItem value="Not to specify">Not to specify</MenuItem>
+                                </Select>
+                            </FormControl>
                         )}
                     />
                     {errors.gender && <p className='text-[#d32f2f] text-sm'>* {errors.gender?.message}</p>}
@@ -166,13 +159,16 @@ function AddCrud({ handleAddobj, toggle }) {
                         control={control}
                         name='state'
                         render={({ field }) => (
-                            <select {...field}
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option></option>
-                                {StateList.map((n, i) => (
-                                    <option value={n} key={i}>{n}</option>
-                                ))}
-                            </select>
+                            <FormControl size='small' fullWidth>
+                                <Select
+                                    {...field}
+                                    labelId="demo-simple-select-label"
+                                >
+                                    {filterState.map((n, i) => (
+                                        <MenuItem value={n.state} key={i}>{n.state}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         )}
                     />
                     {errors.state && <p className='text-[#d32f2f] text-sm'>* {errors.state?.message}</p>}
@@ -183,14 +179,16 @@ function AddCrud({ handleAddobj, toggle }) {
                         control={control}
                         name='city'
                         render={({ field }) => (
-                            <select {...field}
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                <option></option>
-                                <option value={"test"}>test</option>
-                                {/* {CityList.map((n, i) =>(
-                                    <option value={n} key={i}>{n}</option>
-                                ))} */}
-                            </select>
+                            <FormControl size='small' fullWidth>
+                                <Select
+                                    {...field}
+                                    labelId="demo-simple-select-label"
+                                >
+                                    {filterCity.map((n, i) => (
+                                        <MenuItem value={n.name} key={i}>{n.name}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         )}
                     />
                     {errors.city && <p className='text-[#d32f2f] text-sm'>* {errors.city?.message}</p>}
@@ -208,28 +206,19 @@ function AddCrud({ handleAddobj, toggle }) {
                             render={({ field }) => (
                                 <input
                                     {...field}
-                                    type="number"
+                                    type="text"
                                     maxLength={6}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Enter pincode"
+                                    onChange={e => {
+                                        const pincode = e.target.value.replace(/[^0-9]/g, "");
+                                        field.onChange(pincode)
+                                    }}
                                 />
                             )}
                         />
                     </div>
                     {errors.pincode && <p className='text-[#d32f2f] text-sm'>* {errors.pincode?.message}</p>}
-                </Grid>
-                <Grid item md={6}>
-                    <label className="text-foreground text-sm mb-2">Editable</label>
-                    <div className=''>
-                        <Controller
-                            control={control}
-                            name='edit'
-                            render={({ field }) => (
-                                <Switch {...field} defaultChecked={field.value} />
-                            )}
-                        />
-                    </div>
-
                 </Grid>
             </Grid>
 

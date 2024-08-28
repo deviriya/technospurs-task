@@ -16,15 +16,18 @@ import {
 } from '@/components/ui/modal';
 import { useState } from "react";
 import { Button } from "@/components/ui/button"
+import useConfirm from "@/components/ui/confirm"
 import AddCrud from "@/components/pages/addCrud";
 import { Edit, PlusCircle, Trash } from "lucide-react";
 import EditCrud from "@/components/pages/editCrud";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 export function TableDemo() {
 
     // useStates
     const [list, setList] = useState(JSON.parse(sessionStorage.getItem("userList")) || [])
     const [editData, setEditdata] = useState({});
+    const [Dialog, confirmDelete] = useConfirm()
 
     // Modals
     const [open, setOpen] = useState(false);
@@ -38,19 +41,22 @@ export function TableDemo() {
     // Crud func.
     const handleAddobj = async (item) => {
         setList([...list, item])
-        sessionStorage.setItem("userList",JSON.stringify([...list, item]))
+        sessionStorage.setItem("userList", JSON.stringify([...list, item]))
     }
 
-    const handleDelete = (id) => {
-        let newArr = list.filter((x) => x.id !== id)
-        setList([...newArr]);
-        sessionStorage.setItem("userList",JSON.stringify([...newArr]))
+    const handleDelete = async (id) => {
+        const ans = await confirmDelete()
+        if (ans) {
+            let newArr = list.filter((x) => x.id !== id)
+            setList([...newArr]);
+            sessionStorage.setItem("userList", JSON.stringify([...newArr]))
+        }
     }
 
     const handleEdit = (item) => {
         var Index = list.findIndex(x => x.id === item.id);
         list[Index] = item;
-        sessionStorage.setItem("userList",JSON.stringify(list))
+        sessionStorage.setItem("userList", JSON.stringify(list))
     }
 
     return (
@@ -58,6 +64,8 @@ export function TableDemo() {
             <div className="flex justify-end">
                 <Button onClick={toggle}><PlusCircle size={18} className="mr-2" /> Add User</Button>
             </div>
+            <Dialog />
+
             {list.length > 0 ?
                 <Table>
                     <TableHeader>
@@ -74,13 +82,13 @@ export function TableDemo() {
                     <TableBody>
                         {list.map((n, i) => (
                             <TableRow key={i}>
-                                <TableCell className="font-medium text-center">{i + 1}</TableCell>
+                                <TableCell className="text-center">{i + 1}</TableCell>
                                 <TableCell className="text-[13px]">{n.name}</TableCell>
                                 <TableCell className="text-[13px]">{n.email}</TableCell>
                                 <TableCell className="text-[13px]">{n.linkedin}</TableCell>
                                 <TableCell className="text-[13px]">{n.gender}</TableCell>
                                 <TableCell className="text-[13px]">
-                                    <div className="text-text-sm text-muted-foreground whitespace-break-spaces">
+                                    <div className="text-sm text-muted-foreground whitespace-break-spaces">
                                         <p>{n.address1}</p>
                                         <p>{n.address2}, {n.city}</p>
                                         <p>{n.state}-{n.pincode}</p>
@@ -88,7 +96,7 @@ export function TableDemo() {
                                 </TableCell>
                                 <TableCell className="text-[13px]">
                                     <div className="flex gap-8">
-                                        <button className="border-none" disabled={n.edit} onClick={() => toggleEdit(n)}>
+                                        <button className="border-none" onClick={() => toggleEdit(n)}>
                                             <Edit size={18} />
                                         </button>
 
@@ -116,7 +124,7 @@ export function TableDemo() {
                 </CNMoadlContent>
             </CustomModal>
 
-            <CustomModal open={openEdit}>
+            <CustomModal open={openEdit} className='mdl min-w-[70vw]'>
                 <CNMoadlHeader toggle={toggleEdit}>
                     <p className='text-2xl font-bold uppercase'>Edit User</p>
                     <CNMoadlText>Edit user details here.</CNMoadlText>

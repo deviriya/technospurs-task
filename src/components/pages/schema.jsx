@@ -23,6 +23,19 @@ export const schema = yup.object({
     city: yup.string()
         .required("City is required"),
     pincode: yup.string()
-        .required("Pin is required"),
-    edit: yup.boolean().nullable(),
+        .required("Pin is required")
+        .min(6,"Enter a valid pincode")
+        .max(6,"Enter a valid pincode"),
 });
+
+export const defaultValues = {
+    name: "",
+    email: "",
+    linkedin: "",
+    gender: null,
+    address1: "",
+    address2: "",
+    state: "",
+    city: "",
+    pincode: "",
+}
