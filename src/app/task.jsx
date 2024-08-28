@@ -25,7 +25,7 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 export function TableDemo() {
 
     // useStates
-    const [list, setList] = useState(JSON.parse(sessionStorage.getItem("userList")) || [])
+    const [list, setList] = useState([])
     const [editData, setEditdata] = useState({});
     const [Dialog, confirmDelete] = useConfirm()
 
@@ -41,7 +41,6 @@ export function TableDemo() {
     // Crud func.
     const handleAddobj = async (item) => {
         setList([...list, item])
-        sessionStorage.setItem("userList", JSON.stringify([...list, item]))
     }
 
     const handleDelete = async (id) => {
@@ -49,14 +48,12 @@ export function TableDemo() {
         if (ans) {
             let newArr = list.filter((x) => x.id !== id)
             setList([...newArr]);
-            sessionStorage.setItem("userList", JSON.stringify([...newArr]))
         }
     }
 
     const handleEdit = (item) => {
         var Index = list.findIndex(x => x.id === item.id);
         list[Index] = item;
-        sessionStorage.setItem("userList", JSON.stringify(list))
     }
 
     return (
